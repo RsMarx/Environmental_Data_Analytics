@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Reproducibility, Workflow, Version Control"
-author: "Student Name"
+author: Rebecca Marx
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -30,22 +30,22 @@ The completed exercise is due on Thursday, 17 January, 2018 before class begins.
 ### Question
 Why are reproducible practices becoming the norm in data analytics?
 
-> Answer: 
+> Answer: Reproducible practices are becoming the norm in data analytics for the sake of transparency. There's always the possibility of making data say what you want it to say, so it is good to be able to see how researchers have reached their conclusions. Reproducible practices also make collaboration easier. Since so many people work on projects together within and across organizations it helps to be able to follow changes others have made, replicate analyses, repeat analyses with new data at a later date, and potentially apply similar practices to other problems. 
 
 ### Question
 What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I have previously used Stata and Excel for data analytics purposes. I used Stata in econometrics, statistics and environmental valuation courses. I used Excel to analyze survey results in a prodfessional setting. I have never used R or Git, but I signed up to attend the Intro to R workshop at the library next week.  
 
 ### Question
 Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: There's nothing in particular that I feel confident about. Some topics are familiar like data wrangling which I've always found to be a pain and am looking forward hearing a new persepctive to approahcing this. I am failry confident about summary statistics which I've had to come up with in other programs. I've done some crafting reports, but never from R. A lot of this is brand new to me so it should be interesting! 
 
 ### Question
 Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: Working and trouble shooting in new programs may take some getting used to. I know working with real, un-cleaned data sets can be time consuming and a challenge, but that's part of the learning. I'm not sure what to expect for the GLM, Python and Time series analysis portions of the course. 
 
 
 ## 2) GitHub
@@ -53,6 +53,6 @@ Are there any components of the course about which you feel apprehensive?
 ### Your Repository
 Provide a link below to your course repository in GitHub. Make sure you have pulled all recent changes from the course repository (https://github.com/KateriSalk/Environmental_Data_Analytics) and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/RsMarx/Environmental_Data_Analytics
 
 
