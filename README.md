@@ -2,8 +2,11 @@
 Data analytics course for Duke University. Course code: ENV 872L
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## User:Rebecca Marx
 =======
+=======
+>>>>>>> 34a4c954e164fb0c1f65413e36ba92c394a4c97a
 ## User: Kateri Salk
 
 ## Instructions for using this repository: 
@@ -29,4 +32,7 @@ OR
 `git merge upstream/master`
 
 6. If a conflict arises during merge, update the file(s) to your liking, stage them and commit them.
+<<<<<<< HEAD
 >>>>>>> 6b3336d7a4a82495467c3e73549a0602fa0a826d
+=======
+>>>>>>> 34a4c954e164fb0c1f65413e36ba92c394a4c97a
