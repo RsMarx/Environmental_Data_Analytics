@@ -8,7 +8,6 @@ fig_width: 5
 fig_height: 2.5
 editor_options: 
   chunk_output_type: console
-
 ---
 
 ## LESSON OBJECTIVES
@@ -49,7 +48,7 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
 str(USGS.flow.data)
 dim(USGS.flow.data)
 
-#head(USGS.flow.data)
+#head(USGS.flow.data) #Will show first six lines of data 
 class(USGS.flow.data$datetime)
 
 ```
@@ -82,10 +81,9 @@ help(as.Date)
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
-
+format(today+4, format = "%y, %m, %d")
+format(today, format = "%Y, %b, %d")
+format(today, format = "%A,%m,%d,%B")
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") 
 ```
 
@@ -95,14 +93,14 @@ Note that for every date prior to 1969, R has assigned the date in the 2000s rat
 # 
 USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
-#
+# formatting date as year, month, day in the datetime column 
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
-#
+# Create a function that tells it to change to 20 if the [day is not higher than 181231 - 2018, 31 December, that means we're somehwere in the 1900s] -- works because we changed the formate of datetime. Giving it something called "d" - the ingredient. pastzero will take the two statements inside and puts them together"
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
-#
+#We've only written the fuction, noe we have to run it. 
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d") 
 
 ```
@@ -117,10 +115,10 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 Question: What types of research questions might make it favorable to remove NAs from a dataset, and what types of research questions might make it favorable to retain NAs in the dataset?
 
-> Answer: 
+> Answer: In social science there may be meaning to the NA (i.e. taking a survey); Be careful dealing with true NA versus missing data; Some statistical models cannot allow NA (for example, time series)
 
 ```{r}
-USGS.flow.data.complete <- na.omit(USGS.flow.data)
+USGS.flow.data.complete <- na.omit(USGS.flow.data) #Operates on rows of data; Dollar signs and selecting certain columns are an option; #complete.cases tells you which cases are complete -- will quarry for full rows [na.omit will omit the entire row -- keeps only the days where all of the observations are complete]
 dim(USGS.flow.data)
 dim(USGS.flow.data.complete)
 
@@ -152,17 +150,17 @@ Visualize distributions of values for continuous numerical variables. What is ha
 ```{r, fig.height = 3, fig.width = 4}
 #
 ggplot(USGS.flow.data.complete) +
-  geom_histogram(aes(x = discharge.mean))
+  geom_histogram(aes(x = discharge.mean)) #choose data; provide aesthetics; automatically divided in to 30 bins but you can tell it a bin width 
 
 #
 ggplot(USGS.flow.data.complete) +
-  geom_histogram(aes(x = discharge.mean), binwidth = 10)
+  geom_histogram(aes(x = discharge.mean), binwidth = 10) #dishcarge mean of 10 units - will give it in the units of whatever column that is 
 
 #
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), bins = 20)
 
-#
+# Zooming in on some data for illustrative purposes 
 ggplot(USGS.flow.data.complete, aes(x = discharge.mean)) +
   geom_histogram(binwidth = 10) + 
   scale_x_continuous(limits = c(0, 500))
@@ -177,14 +175,14 @@ ggplot(USGS.flow.data.complete) +
 An alternate to a histogram is a frequency polygon graph (distributions of values for continuous numerical variables). Instead of displaying bars,  counts of continuous variables are displayed as lines. This is advantageous if you want to display multiple variables or categories of variables at once.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+# More minimums are lower counts (blue); Created frequency polygons for three different columns
 ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.mean), bins = 50) +
   geom_freqpoly(aes(x = gage.height.min), bins = 50, color = "blue") +
   geom_freqpoly(aes(x = gage.height.max), bins = 50, color = "red") +
   scale_x_continuous(limits = c(0, 10))
 
-#
+# New measurements versus old measurements; Based on what categories they fall in to (from a single column); Color is based on the status of the other variable
 ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
@@ -210,7 +208,7 @@ An alternate option is a violin plot, which displays density distributions, some
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
 
-#
+#gage height: the height of the river. The greater the depth of the river the more water is going to be flowing through. 
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean, y = discharge.mean, group = cut_width(gage.height.mean, 1)))
 
@@ -230,7 +228,7 @@ Visualize relationships between continuous numerical variables.
 ```{r, fig.height = 3, fig.width = 4}
 ggplot(USGS.flow.data.complete) +
   geom_point(aes(x = discharge.mean, y = gage.height.mean))
-
+#told it 3,4 to fit better on the page for a PDF 
 ```
 
 ## ENDING DISCUSSION

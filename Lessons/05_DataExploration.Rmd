@@ -36,6 +36,7 @@ If your working directory is not set to the folder you want, you have several op
 ```{r}
 # Absolute file path is commented out
 #setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
+#Specific to your own computer. Be careful about doing this. 
 ```
 
 You may change your working directory without coding by going to the Session menu in RStudio and navigating to the Set Working Directory tab. From there, you may select from a series of options to reset your working directory. 
@@ -101,27 +102,27 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
                               "gage.height.max", "gage.height.max.approval", 
                               "gage.height.min", "gage.height.min.approval", 
                               "gage.height.mean", "gage.height.mean.approval")
-str(USGS.flow.data)
-dim(USGS.flow.data)
-length(USGS.flow.data)
+str(USGS.flow.data) #structure; i.e. summary of rows and columns 
+dim(USGS.flow.data) #dimensions tells rows and columns 
+length(USGS.flow.data) #tells you the number of columsn 
 
-head(USGS.flow.data)
-head(USGS.flow.data, 10)
-tail(USGS.flow.data, 5)
-USGS.flow.data[30000:30005, c(3, 8, 14)]
+head(USGS.flow.data) #Give the first couple row of each of the columns 
+head(USGS.flow.data, 10) #Can command to look at first 10 rows 
+tail(USGS.flow.data, 5) #Can get the end of the data. Last five specified. 
+USGS.flow.data[30000:30005, c(3, 8, 14)] #Can specify which rows and columns 
 
 class(USGS.flow.data$datetime)
 class(USGS.flow.data$discharge.mean)
 class(USGS.flow.data$gage.height.mean)
 
-summary(USGS.flow.data)
+summary(USGS.flow.data) #Gives basic stats 
 summary(USGS.flow.data$discharge.mean)
 summary(USGS.flow.data$gage.height.mean)
 
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> ANSWER: 
+> ANSWER: They show N/A. Be carefull what class you import as. They treat NA vs. blanks differently. 
 
 ## TIPS AND TRICKS: SPREADSHEETS
 

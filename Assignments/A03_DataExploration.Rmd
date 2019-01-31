@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3: Data Exploration"
-author: "Student Name"
+author: "Rebecca Marx"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -29,6 +29,15 @@ The completed exercise is due on Thursday, 31 January, 2019 before class begins.
 
 Check your working directory, load necessary packages (tidyverse), and upload the North Temperate Lakes long term monitoring dataset for the light, temperature, and oxygen data for three lakes (file name: NTL-LTER_Lake_ChemistryPhysics_Raw.csv). Type your code into the R chunk below.
 ```{r}
+getwd()
+
+#Load package
+library(tidyverse)
+
+#Import datasets
+North.Temperate.Lakes.data <-read.csv("../Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+
+#Looked at ReadMe file
 
 ```
 
@@ -36,7 +45,10 @@ Check your working directory, load necessary packages (tidyverse), and upload th
 
 Read about your dataset in the NTL-LTER README file. What are three salient pieces of information you gained from reading this file?
 
-> ANSWER: 
+> ANSWER: 1) From the README file I learned that this data set was prepared specifically for this course at Duke University by Kateri Salk.
+2) The data pertains to lakes in Wisconsin and it was collected as part of a Long Term Ecological Research study between 1984 and 2016. 
+3) The file provides information about methods for taking samples. For example, I leaned that physical and chemical variables were measured at the deepest points of each lake. Samples were sent to the Cary Institute of Ecosystem studies for analysis. 
+
 
 ## 3) Obtain basic summaries of your data
 
@@ -50,26 +62,39 @@ Write R commands to display the following information:
 
 ```{r}
 # 1
+dim(North.Temperate.Lakes.data)
 
-# 2
+# 2 
+class(North.Temperate.Lakes.data)
 
-# 3
+# 3 
+head(North.Temperate.Lakes.data, 8)
 
-# 4
+# 4 
+class(North.Temperate.Lakes.data$lakename)
+class(North.Temperate.Lakes.data$sampledate)
+class(North.Temperate.Lakes.data$depth)
+class(North.Temperate.Lakes.data$temperature_C)
 
-# 5
-
+# 5 
+summary(North.Temperate.Lakes.data$lakename)
+summary(North.Temperate.Lakes.data$depth)
+summary(North.Temperate.Lakes.data$temperature_C)
 ```
 
 Change sampledate to class = date. After doing this, write an R command to display that the class of sammpledate is indeed date. Write another R command to show the first 10 rows of the date column. 
 
 ```{r}
+North.Temperate.Lakes.data$sampledate <- as.Date(North.Temperate.Lakes.data$sampledate, format = "%m/%d/%y")
 
+class(North.Temperate.Lakes.data$sampledate)
+
+head(North.Temperate.Lakes.data$sampledate, 10)
 ```
-
+ 
 Question: Do you want to remove NAs from this dataset? Why or why not?
 
-> ANSWER: 
+> ANSWER: No, I do not want to remove NAs from this dataset. Removing NAs from this data set would remove whole rows of information, even if there are data points in some of the comlumns. For example, there are several rows that have an entry for temperature, but do not have information for irradiance water or irradiance deck. Removing the NAs would remove some of the temperature entries. I am interested in summarizing all the temperature data that was avalailable. Since I am simply summarizing data and not doing anything like a regression, the NAs will not be problematic in my analysis. In fact, the graphs will automatically account for the missing data by "[removing] row containing non-finitie values".  
 
 
 ## 4) Explore your data graphically
@@ -85,31 +110,38 @@ Write R commands to display graphs depicting:
 7. Scatterplot of temperature by depth
 
 ```{r}
-# 1
+# 1 
+ggplot(North.Temperate.Lakes.data, aes(temperature_C, colour = lakename)) + geom_bar()
 
 # 2
+ggplot(North.Temperate.Lakes.data) + geom_histogram(aes(x = temperature_C))
 
 # 3
+ggplot(North.Temperate.Lakes.data) + geom_histogram(aes(x = temperature_C), binwidth = .5)
 
 # 4
+ggplot(North.Temperate.Lakes.data, aes(temperature_C, colour = lakename)) + geom_freqpoly (binwidth = 1)
 
 # 5
+ggplot(North.Temperate.Lakes.data, aes(x = lakename, y = temperature_C)) + geom_boxplot()
 
 # 6
+ggplot(North.Temperate.Lakes.data) + geom_boxplot(aes(x = depth, y = temperature_C, group = cut_width(depth, .25)))
 
 # 7 
+ggplot(North.Temperate.Lakes.data) + geom_point(aes(x = depth, y = temperature_C))
 
 ```
 ## 5) Form questions for further data analysis
 
 What did you find out about your data from the basic summaries and graphs you made? Describe in 4-6 sentences.
 
-> ANSWER: 
+> ANSWER: From my basic summaires, I found out that Peter Lake has the most temperature counts, and Hummingbird Lake has the least. The highest frequnecy of temperature is around 5 degrees celcius. Temperatures tend to be higher at lower depths. Central Long Lake has the highest median temperature. There were very few outliers, but the higest outlier temperature was close to 35 degress Celcius in East Long Lake while the lowest was close to 0 degress Celcius in Central Long Lake.
 
 What are 3 further questions you might ask as you move forward with  analysis of this dataset?
 
-> ANSWER 1: 
+> ANSWER 1: How has the temperature in each lake changed over time? 
 
-> ANSWER 2: 
+> ANSWER 2: How does water temperature relate to levels of dissolved oxygen? 
 
-> ANSWER 3: 
+> ANSWER 3: What is the trend in temperature in terms of months of the year? 
