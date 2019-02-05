@@ -30,7 +30,7 @@ NTL.phys.data <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 
 head(NTL.phys.data)
 colnames(NTL.phys.data)
-summary(NTL.phys.data)
+summary(NTL.phys.data) #categorical will give a count of each variable; Numer will give un min, max, central tendency measurements. 
 dim(NTL.phys.data)
 
 ```
@@ -50,7 +50,7 @@ What is the best way to wrangle data? There are multiple ways to arrive at a spe
 `dplyr` is a package in R that includes functions for data manipulation (i.e., data wrangling or data munging). `dplyr` is included in the tidyverse package, so you should already have it installed on your machine. The functions act as verbs for data wrangling processes. For more information, run this line of code:
 
 ```{r, results = "hide"}
-vignette("dplyr")
+vignette("dplyr") #d stands for dataframe
 ```
 
 
@@ -59,58 +59,62 @@ vignette("dplyr")
 Filtering allows us to choose certain rows (observations) in our dataset.
 
 A few relevant commands: 
-`==`
-`!=`
+`==`#equals
+`!=`#is not
 `<`
 `<=`
 `>`
 `>=`
 `&`
-`|`
+`|`#Or 
 
 ```{r}
 class(NTL.phys.data$lakeid)
 class(NTL.phys.data$depth)
 
 # matrix filtering
-NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,]
+NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,] #include the comma because?
 
 # dplyr filtering
-NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)
+NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0) #dataframe, conditional statement 
 NTL.phys.data.surface3 <- filter(NTL.phys.data, depth < 0.25)
 
 # Did the methods arrive at the same result?
-head(NTL.phys.data.surface1)
+head(NTL.phys.data.surface1) #whatever the row names used to be 
 dim(NTL.phys.data.surface1)
 head(NTL.phys.data.surface2)
 dim(NTL.phys.data.surface2)
-head(NTL.phys.data.surface3)
+head(NTL.phys.data.surface3) #with dplyer stored as new row names 
 dim(NTL.phys.data.surface3)
 
-# Choose multiple conditions to filter
+# Choose multiple conditions to filter;#Facotrs have to be in quotation marks 
 summary(NTL.phys.data$lakename)
 NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")
 NTL.phys.data.PeterPaul2 <- filter(NTL.phys.data, lakename != "Central Long Lake" & 
                                      lakename != "Crampton Lake" & lakename != "East Long Lake" &
                                      lakename != "Hummingbird Lake" & lakename != "Tuesday Lake" &
-                                     lakename != "Ward Lake" & lakename != "West Long Lake")
-NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake"))
+                                     lakename != "Ward Lake" & lakename != "West Long Lake") #Filter out: tell is to NOT choose those other Lakes; Added retruns in list of lakes to make it easier to read. Will sotre as if it's one line. Use & to exclude things 
+NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake")) #%in% means include : can provide with a LIST of lakes 
 
 # Choose a range of conditions of a numeric or integer variable
 summary(NTL.phys.data$daynum)
-NTL.phys.data.JunethruOctober1 <- filter(NTL.phys.data, daynum > 151 & daynum < 305)
-NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305)
+NTL.phys.data.JunethruOctober1 <- filter(NTL.phys.data, daynum > 151 & daynum < 305) #day number June 1 and Octobe [31?]
+NTL.phys.data.JunethruOctober2 <- filter(NTL.phys.data, daynum > 151, daynum < 305) #same thing: the comma will operate as an & in dpleyr
 NTL.phys.data.JunethruOctober3 <- filter(NTL.phys.data, daynum >= 152 & daynum <= 304)
-NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304))
+NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304)) #telling it the range of numbers to inclcude 
 
 # Exercise: 
 # filter NTL.phys.data for the year 1999
+NTL.phys.data.Year1999 <- filter(NTL.phys.data, year4 == 1999) 
+
 # what code do you need to use, based on the class of the variable?
 class(NTL.phys.data$year4)
 
 # Exercise: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
+NTL.phys.data.TL.90_99 <- filter(NTL.phys.data, year4 %in% c(1990:1999) & lakename == "Tuesday Lake")
 
+#year 4 < 200 & year4 > 1989 & lakename == "Tuesday Lake"
 
 ```
 Question: Why don't we filter using row numbers?
@@ -122,13 +126,15 @@ Question: Why don't we filter using row numbers?
 Arranging allows us to change the order of rows in our dataset. By default, the arrange function will arrange rows in ascending order.
 
 ```{r}
-NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth)
+NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth) #arrange our dataset by depth; Coulf arrange a certain way to send a csv file to someone else 
 NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 
 # Exercise: 
 # Arrange NTL.phys.data by temperature, in descending order. 
-# Which dates, lakes, and depths have the highest temperatures?
+NTL.phys.data.temp.descend <- arrange(NTL.phys.data, desc(temperature_C))
 
+# Which dates, lakes, and depths have the highest temperatures?
+#East Long and Hummingbird; Summer months near the surface 
 
 ```
 ### Select
@@ -136,7 +142,10 @@ NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 Selecting allows us to choose certain columns (variables) in our dataset.
 
 ```{r}
-NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
+NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C) #hoosing lakename and sample date through temp; between and including smaple dat and temperature; select isn't as felxible as filter for conditional statments. Will want to use commas and colons. 
+#already pointing to this data set so don't have to includ the "dataset$variable"
+
+#highlihgt and press quotation marks it will do them
 
 ```
 ### Mutate
@@ -145,7 +154,7 @@ Mutating allows us to add new columns that are functions of existing columns. Op
 
 ```{r}
 
-NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
+NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32) #will alwasy put the column at the very end. You can write a new line of code to put the column somewhere else. 
 
 ```
 ### Pipes
@@ -156,10 +165,10 @@ Let's say we want to take our raw dataset (NTL.phys.data), *then* filter the dat
 
 ```{r}
 NTL.phys.data.processed <- 
-  NTL.phys.data %>%
+  NTL.phys.data %>% #then; pointed to that dataframe and told it do a bunch of stuff in the data frame. Put as the first line in the pipe then tell it what to do. 
   filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
   select(lakename, sampledate:temperature_C) %>%
-  mutate(temperature_F = (temperature_C*9/5) + 32)
+  mutate(temperature_F = (temperature_C*9/5) + 32) #makes it fast and elminates the need to have all the intermediate dataframes with strange names that you might not use in the end. 
   
 ```
 
@@ -169,6 +178,7 @@ Notice that we did not place the dataset name inside the wrangling function but 
 
 ```{r}
 write.csv(NTL.phys.data.PeterPaul1, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+#Saving a data set; row.names = TRUE just counts all the rows, so telling it not to include that. First column will be the first column in the data frame. Then tell it what to call the file and specify a relative file path. One dot goes doen a folder. Two dots goes up a fold. Want it to go down one in to the data folder then want it to go in to the processed data foleder. Does not warn you when you are re-writing a file. Usually comment out a file so that you don't change it every time you run. 
 ```
 
 ## CLOSING DISCUSSION
