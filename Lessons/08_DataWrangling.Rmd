@@ -28,14 +28,14 @@ NTL.nutrient.data <- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv")
 head(NTL.phys.data.PeterPaul)
 colnames(NTL.phys.data.PeterPaul)
 dim(NTL.phys.data.PeterPaul)
-summary(NTL.phys.data.PeterPaul$comments)
+summary(NTL.phys.data.PeterPaul$comments) #ask for summary of specific column 
 class(NTL.phys.data.PeterPaul$sampledate)
 
 # Format sampledate as date
 NTL.phys.data.PeterPaul$sampledate <- as.Date(NTL.phys.data.PeterPaul$sampledate, format = "%m/%d/%y")
 
 # Select Peter and Paul Lakes from the nutrient dataset
-NTL.nutrient.data.PeterPaul <- filter(NTL.nutrient.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+NTL.nutrient.data.PeterPaul <- filter(NTL.nutrient.data, lakename == "Paul Lake" | lakename == "Peter Lake") #filter select rows; select selects columns 
 
 # Data summaries for nutrient data
 head(NTL.nutrient.data.PeterPaul)
@@ -48,9 +48,11 @@ NTL.nutrient.data.PeterPaul$sampledate <- as.Date(NTL.nutrient.data.PeterPaul$sa
 # Save processed nutrient file
 write.csv(NTL.nutrient.data.PeterPaul, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
 
+#drop.levels should read that we only have Peter and Paul Lake associated wtih a column 
+
 # Remove columns that are not of interest for analysis
 NTL.phys.data.PeterPaul.skinny <- select(NTL.phys.data.PeterPaul, 
-                                         lakename, daynum, year4, sampledate:irradianceDeck)
+                                         lakename, daynum, year4, sampledate:irradianceDeck) #tell it which columns we want to keep. Could put a minuns sign in front of all of them if you wanted it to remove them. 
   
 NTL.nutrient.data.PeterPaul.skinny <- select(NTL.nutrient.data.PeterPaul, 
                                              lakename, daynum, year4, sampledate, depth:po4)
@@ -69,19 +71,19 @@ However, there may be situations where we want to reshape our dataset, for examp
 
 ```{r}
 # Gather nutrient data into one column
-NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.skinny, "nutrient", "concentration", tn_ug:po4)
-NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration))
+NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.skinny, "nutrient", "concentration", tn_ug:po4) #takes 5 columns and gathers in to one. Will take maximum number in original data set  
+NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration)) #remove has associated with concentration 
 count(NTL.nutrient.data.PeterPaul.gathered, nutrient)
 
 write.csv(NTL.nutrient.data.PeterPaul.gathered, row.names = FALSE, 
           file ="./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 
 # Spread nutrient data into separate columns
-NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, nutrient, concentration)
+NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, nutrient, concentration) #indicate which column you wnat to spread by. In this case the nutrient column. 
 
 # Split components of cells into multiple columns
 # Opposite of 'separate' is 'unite'
-NTL.nutrient.data.PeterPaul.dates <- separate(NTL.nutrient.data.PeterPaul.skinny, sampledate, c("Y", "m", "d"))
+NTL.nutrient.data.PeterPaul.dates <- separate(NTL.nutrient.data.PeterPaul.skinny, sampledate, c("Y", "m", "d")) #will store as a character class rather than a date 
 
 ```
 
@@ -112,14 +114,14 @@ write.csv(NTL.phys.nutrient.data.PeterPaul, row.names = FALSE,
 A package that makes coercing date much easier is `lubridate`. A guide to the package can be found at https://lubridate.tidyverse.org/. The cheat sheet within that web page is excellent too. This package can do many things (hint: look into this package if you are having unique date-type issues), but today we will be using two of its functions for our NTL dataset. 
 
 ```{r}
-#install.packages(lubridate)
+#install.packages(lubridate) #Good package if you're using data from different people 
 library(lubridate)
 
 # add a month column to the dataset
 NTL.phys.nutrient.data.PeterPaul <- mutate(NTL.phys.nutrient.data.PeterPaul, month = month(sampledate)) 
 
 # reorder columns to put month with the rest of the date variables
-NTL.phys.nutrient.data.PeterPaul <- select(NTL.phys.nutrient.data.PeterPaul, lakename, year4, month, sampledate:po4)
+NTL.phys.nutrient.data.PeterPaul <- select(NTL.phys.nutrient.data.PeterPaul, lakename, year4, month, sampledate:po4) #overwrite; select all the columns but in a different order 
 
 # find out the start and end dates of the dataset
 interval(NTL.phys.nutrient.data.PeterPaul$sampledate[1], NTL.phys.nutrient.data.PeterPaul$sampledate[23372])
@@ -143,6 +145,7 @@ NTL.PeterPaul.summaries <-
             sdTN = sd(tn_ug), 
             meanTP = mean(tp_ug), 
             sdTP = sd(tp_ug))
+#group_by so you don't have to do all the lakes individually; Are able to tell R what you want it to call the columns 
 
 write.csv(NTL.PeterPaul.summaries, row.names = FALSE, 
           file ="./Data/Processed/NTL-LTER_Lake_Summaries_PeterPaul_Processed.csv")
