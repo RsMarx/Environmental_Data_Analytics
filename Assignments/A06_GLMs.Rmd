@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: Generalized Linear Models"
-author: "Student Name"
+author: "Rebecca Marx"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -34,8 +34,28 @@ The completed exercise is due on Tuesday, 26 February, 2019 before class begins.
 
 ```{r}
 #1
+setwd("C:/Users/rsmar/OneDrive/Documents/Spring 2019/RFolder/Environmental_Data_Analytics")
+library(RColorBrewer)
+library(viridis)
+library(colormap)
+library(gridExtra)
+library(tidyverse)
+#install.packages("dunn.test")
+library(dunn.test)
+
+#get data
+EPAecotox <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+Chem.Phys <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+
+# Set date to date format
+#EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
 
 #2
+RMtheme <- theme_bw(base_size = 11) +
+  theme(plot.title = element_text(size = 15, color = "black", hjust = .5),
+    axis.text = element_text(color = "black"),
+    legend.position = "bottom", legend.text = element_text(size = 9), legend.title = element_text(size = 10))
+theme_set(RMtheme)
 
 ```
 
@@ -50,31 +70,55 @@ Research question: Were studies on various neonicotinoid chemicals conducted in 
 
 ```{r}
 #3
+summary(EPAecotox$Chemical.Name) 
 
 #4
+shapiro.test(EPAecotox$Pub..Year) 
+ 
+ggplot(EPAecotox, aes(x = Pub..Year, color = Chemical.Name)) +
+  geom_freqpoly(binwidth = 5)
 
 #5
+bartlett.test(EPAecotox$Pub..Year,EPAecotox$Chemical.Name)
+
+# OR bartlett.test(Pub..Year~Chemical.Name,EPAecotox) works too 
 
 ```
 
 6. Based on your results, which test would you choose to run to answer your research question?
 
-> ANSWER: 
+> ANSWER: The shapiro wilk test with a p-value of less than .001 and the corresponding frequency polygon results tell me that the years that studies were published are not normally dristributed but rather are skewed. The bartlett test result has a p-value of less than .001 as well. This means I can reject the null hypothesis that the variance is the same for all chemicals, and there is evidence to suggest that the variance in publication years is different for all the chemicals. Since the data is not normally distributed and the variances are not equal, I will use the non-parametric equivalent of ANOVA: the Kruskal-Wallis Test.                 
 
 7. Run this test below. 
 
 8. Generate a boxplot representing the range of publication years for each chemical. Adjust your graph to make it pretty.
 ```{r}
 #7
+Pub..Year.kw <- kruskal.test(EPAecotox$Pub..Year ~ EPAecotox$Chemical.Name)
+Pub..Year.kw
 
-#8
+dunn.test(EPAecotox$Pub..Year, EPAecotox$Chemical.Name, kw = T, table = F, list = T, method = "holm", altp = T) 
+
+#8 
+legend_title_7 <- "Chemical Name"
+Chem.Pub.Box <- 
+  ggplot(EPAecotox, aes(x = Chemical.Name, y = Pub..Year, color = Chemical.Name)) +
+  geom_boxplot() +
+  scale_color_manual(values = c("steelblue4", "firebrick3", "slateblue3", "tan2", "seagreen4", "plum4", "lightskyblue4", "deeppink3", "goldenrod3")) +
+  scale_y_continuous(limits = c(1980,2020)) +
+  ggtitle("Publication Years for Chemicals") +
+  ylab(expression("Publication Year")) +
+  xlab(expression("Chemical")) +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1), legend.text = element_text(size = 8), legend.title = element_text(size = 9))
+print(Chem.Pub.Box)
 
 ```
 
 
 9. How would you summarize the conclusion of your analysis? Include a sentence summarizing your findings and include the results of your test in parentheses at the end of the sentence. 
 
-> ANSWER: 
+> ANSWER: Yes, studies on various neonicotinoid chemicals were conducted in different years. The result of the Kruskal-Wallis test indicates that there is a significant differene between groups (chemicals), though the test does not indicate which chemicals differ from each other (Df = 8, p-value < .001 or 2.2e-16).
+Looking at the box plot you can see that Nithiazine studies occurred much earlier than other studies. Dinotefuran studies were on the earlier end as were Acetamiprid studiest, but many of the other chemicals had studies that took place around or shortly after 2010. The studies were not normally distributed, per the result of the Shapiro-Wilk test with a p-value of less than .001. The results of the Bartlett test also had a p-value of less than .001, meaning the variances of chemicals are not equal. This was confirmed with the Dunn test which did a pair-wise comparison of variances. As depcited in the box plot, the pairs involving Nithiazine all had p-values of less than .00001, meaning they did no have equal variances, evan as some pairs showed to have similar variances with p-values close to 1.  
 
 ## NTL-LTER test
 Research question: What is the best set of predictors for lake temperatures in July across the monitoring period at the North Temperate Lakes LTER? 
@@ -89,30 +133,58 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 ```{r}
 #11
+Chem.Phys.Filter <- 
+  Chem.Phys %>%
+  filter(daynum %in% c(183:212)) %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  filter(!is.na(lakename) & !is.na(year4) &!is.na(daynum) & !is.na(depth) & !is.na(temperature_C))
 
 #12
+Chem.Phys_AIC <- lm(data = Chem.Phys.Filter, temperature_C ~ year4 + daynum + depth) 
+step(Chem.Phys_AIC)
+
+
+Chem.Phys_model <- lm(data = Chem.Phys.Filter, temperature_C ~ year4 + daynum + depth)
+summary(Chem.Phys_model)
 
 ```
 
 13. What is the final linear equation to predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> ANSWER: 
+> ANSWER: Given that AIC was lowest when no variables were removed, I used the linear equation with all three varibles to predict temperature: Temperature_C = -10.139 + .012(year4) + .038(daynum) - 1.948(depth). This model explains 74.15% of the variance in temperature. 
+
 
 14. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
 #14
+Depth_Lake.interaction <- lm(data = Chem.Phys.Filter, temperature_C ~ lakename * depth)
+summary(Depth_Lake.interaction)
 
 ```
 
 15. Is there an interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> ANSWER: 
+> ANSWER: Yes, there is an interaction between depth and lakename. The p-value for the interaction effect is less than 0.05, thus we consider the interaction between depth and lakename to be significant. The interaction between lakename and depth explains 78.63% of the variance in temperature. 
+
 
 16. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
 ```{r}
 #16
+legend_title_TxD <- "Lakes"
+TempXDepth.graph <- 
+  ggplot(Chem.Phys.Filter, aes(x = depth, y = temperature_C, color = lakename)) +
+  geom_point(alpha = .5) +
+  ggtitle("Temperature by Depth in Lakes") +
+  ylab(expression("Temperature (C)")) +
+  scale_y_continuous(limits = c(0,35)) +
+  xlab(expression("Depth (m)")) +
+  scale_x_continuous(breaks=seq(0, 25, by=5)) +
+  scale_color_manual(legend_title_TxD,values = c("darkblue","blueviolet","firebrick3", "tan2", "chartreuse3", "cadetblue3", "lightskyblue4", "coral", "goldenrod4")) +
+  geom_smooth(aes(color = lakename),method = lm, se= FALSE)
+print(TempXDepth.graph)
+
 
 ```
 

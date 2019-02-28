@@ -100,7 +100,7 @@ create.early.dates <- (function(d) {
 # Create a function that tells it to change to 20 if the [day is not higher than 181231 - 2018, 31 December, that means we're somehwere in the 1900s] -- works because we changed the formate of datetime. Giving it something called "d" - the ingredient. pastzero will take the two statements inside and puts them together"
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
-#We've only written the fuction, noe we have to run it. 
+#We've only written the fuction, now we have to run it. 
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d") 
 
 ```

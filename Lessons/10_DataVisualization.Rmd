@@ -67,6 +67,7 @@ If you would like to set a common theme across all plots in your analysis sessio
 mytheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "black"), 
         legend.position = "top") #alternative: legend.position + legend.justification
+#could put the legend on the insdie of the graph using position and justification commands: legend.position = c(1,1), legend.justification - c(1,1)
 
 # options: call the theme in each plot or set the theme at the start. 
 
@@ -75,7 +76,7 @@ O3plot5 <- ggplot(EPAair) +
   mytheme
 print(O3plot5)  
 
-theme_set(mytheme)
+theme_set(mytheme) #will use the theme throughout the remainder of your session. 
 
 O3plot6 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
@@ -90,16 +91,16 @@ While the theme allows us to set multiple aspects of plots, ggplot allows us to 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 O3plot7 <- ggplot(EPAair, aes(x = Date, y = Ozone)) +
   geom_rect(xmin = as.Date("2016-01-01"), xmax = as.Date("2020-01-01"), 
-            ymin = 0, ymax = 50, fill = "green") +
-  geom_rect(xmin = as.Date("2016-01-01"), xmax = as.Date("2020-01-01"), 
-            ymin = 50, ymax = 100, fill = "yellow") +
+            ymin = 0, ymax = 60, fill = "green") +
+  geom_rect(xmin = as.Date("2016-01-01"), xmax = as.Date("2020-01-01"), #put recs as starting and ending after the data becuse otherwise there will be white space around it 
+            ymin = 60, ymax = 100, fill = "pink") +
   geom_point() +
-  geom_text(x = as.Date("2019-01-01"), y = 45, label = "good", hjust = 1, fontface = "bold") +
-  geom_text(x = as.Date("2019-01-01"), y = 95, label = "moderate", hjust = 1, fontface = "bold") +
-  scale_x_date(limits = as.Date(c("2017-01-01", "2018-12-31")), 
-    date_breaks = "2 months", date_labels = "%b %y") +
-  ylab(expression("O"[3]* " AQI Value")) +
-  theme(axis.text.x = element_text(angle = 45,  hjust = 1))
+  geom_text(x = as.Date("2019-01-01"), y = 50, label = "good", hjust = 1, fontface = "bold") +
+  geom_text(x = as.Date("2019-01-01"), y = 95, label = "bad", hjust = 1, fontface = "italic") +
+  scale_x_date(limits = as.Date(c("2017-01-01", "2018-12-31")), #why does it start in Dec 2016
+    date_breaks = "1 months", date_labels = "%b %y") +
+  ylab(expression("O"[3]* " AQI Value")) + #[]is a subscript; superscript is a carrot 
+  theme(axis.text.x = element_text(angle = 60,  hjust = 1)) #hjust of 1 moves things to the left. vjust moves things up and down. If you put text on your plot it will always plot them centered unless you say otherwise. 
 print(O3plot7)  
 
 ```
@@ -115,9 +116,9 @@ There are several color palettes that are designed to be more effective than pal
 Perception is key! Choose palettes that are visually pleasing and will communicate what you are hoping your audience to perceive. Hint: base R palettes are not ideal.
 
 ```{r, warning = FALSE}
-#install.packages("viridis")
-#install.packages("RColorBrewer")
-#install.packages("colormap")
+install.packages("viridis")
+install.packages("RColorBrewer")
+install.packages("colormap")
 library(viridis)
 library(RColorBrewer)
 library(colormap)
@@ -138,8 +139,8 @@ print(NvsP)
 NvsP2 <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
   geom_point(alpha = 0.8, size = 3) +
-  #xlab() +
-  #ylab() +
+  xlab(expression(Total_P_Grams)) #Doesn't seem that you can use spaces; Could use labs: labs(x = "Total P, micro g/L", y = "Total N, micro g/L", fill = "Depth, m", shape = "Lake"
+  ylab(expression(TN_UG)) + #why didn't it change?
   # change your legend labels here
   scale_shape_manual(values = c(15, 17)) +
   #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
@@ -155,11 +156,11 @@ Nutrientplot <-
   ggplot(PeterPaul.nutrients.gathered, aes(x = lakename, y = concentration, color = nutrient)) +
   geom_boxplot() +
 # place your additional edits here
-  scale_y_continuous(expand = c(0, 0)) +
+  #scale_y_continuous(expand = c(0, 0)) +
   #scale_color_brewer(palette = "YlGnBu") +
-  #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
+  scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
   #scale_color_viridis(discrete = TRUE) +
-  theme(legend.position = "right")
+  theme(legend.position = "bottom")
 print(Nutrientplot)
 ```
 
@@ -181,7 +182,7 @@ print(PMplot.faceted)
 In situations where facets don't fill our needs to place multiple plots on a page, we can use the package `gridExtra` to arrange plots. The `grid.arrange` function is extremely flexible in its ability to arrange plots in specific configurations. A useful guide can be found here: https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html.
 
 ```{r, fig.height = 7, fig.width = 6}
-#install.packages("gridExtra")
+install.packages("gridExtra")
 library(gridExtra)
 grid.arrange(NvsP2, Nutrientplot)
 grid.arrange(O3plot7, PMplot.faceted)
@@ -198,5 +199,5 @@ The `ggsave` function allows you to save plots in jpg, png, eps, pdf, tiff, and 
 * resolution (dpi)
 
 For example: 
-`ggsave("PMplot.jpg", PMplot.faceted,  path = "./Output/PMplotjpg", height = 4, width = 6, units = "in", dpi = 300)`
+`ggsave("PMplot.jpg", PMplot.faceted,  path = "./Output/PMplot.jpg", height = 4, width = 6, units = "in", dpi = 300)`
 

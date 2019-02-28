@@ -22,10 +22,25 @@ library(tidyverse)
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 PeterPaul.chem.nutrients.summaries <- read.csv("./Data/Processed/NTL-LTER_Lake_Summaries_PeterPaul_Processed.csv")
-EPAair <- read.csv("./Data/Processed/EPAair_O3PM25_3sites1718_processed.csv")
+EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1718_Processed.csv")
+
+#Create a new date column 
+# EPAair <- EPAair %>%
+ # unite(Date, Y, m, d) 
+
+#EPAair$Date <- ymd(EPAair$Date)
 
 EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
 PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
+                 
+#To separate date out in to three new columns 
+#EPAair <- 
+  EPAair %>% 
+  mutate(Year = year(Date)) %>% 
+  mutate(Month = month(Date)) %>% 
+  mutate(Day = day(Date))
+
+#select to move things 
 
 ```
 
@@ -71,33 +86,32 @@ Here are some commonly used aesthetic types that can be manipulated in ggplot:
 # Scatterplot
 ggplot(EPAair, aes(x = Date, y = Ozone)) + 
   geom_point()
-
+#If we want to write it on more than one row we need to follow by a plus sign 
 O3plot <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
 print(O3plot)
 
-# Fix this code
 O3plot2 <- ggplot(EPAair) +
-  geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  geom_point(aes(x = Date, y = Ozone), color = "blue")
 print(O3plot2)
 
-# Add additional variables
+# Add additional variables [CHECK ON THIS]
 PMplot <- 
-  ggplot(EPAair, aes(x = month, y = PM2.5, shape = as.factor(year), color = Site.Name)) +
+  ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(year), color = Site.Name)) +
   geom_point()
 print(PMplot)
 
 # Separate plot with facets
 PMplot.faceted <-
-  ggplot(EPAair, aes(x = month, y = PM2.5, shape = as.factor(year))) +
+  ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year))) +
   geom_point() +
   facet_wrap(vars(Site.Name), nrow = 3)
 print(PMplot.faceted)
 
 PMplot.faceted2 <-
-  ggplot(EPAair, aes(x = month, y = PM2.5)) +
+  ggplot(EPAair, aes(x = Month, y = PM2.5)) +
   geom_point() +
-  facet_grid(Site.Name ~ year)
+  facet_grid(Site.Name ~ Year)
 print(PMplot.faceted2)
 
 # Filter dataset within plot building
@@ -147,17 +161,28 @@ print(tempvsdepth)
 
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
-  geom_point() #+
-  #geom_smooth(method = lm) +
-  #geom_abline(aes(slope = 16, intercept = 0))
+  geom_point() +
+  geom_smooth(method = lm) + 
+  geom_abline(aes(slope = 16, intercept = 0), lty = 2)
 print(NvsP)
+#smooth added the line of best fit. The gray area shows a 95% confidnece interval. I.e. 95% confident that this is the linear relationship. 
+#geom80 allows us to draw a linear line with whatever specifications we tell it to. I.e. plot an expected relationship line. lty gives you different line types (i.e. lty2 gives you a dotted line). We are more nitrogen rich and limited in phospheros according to this data and the expected nitrogen to phosphorus ratio. 
 
 # Exercise: Plot relationships between air quality measurements
 
+#can put aesthetics in geom or ggplot. The smooth in this case will draw on the aesthetics from earlier on, but I could define my aethetics twice. #If you define the color aesthetics within the point layer then it will make just one line of best fit for the whole plot. 
+
+#Scale color discrete can be used to change the colors. It will be its own later witin the ggplot. 
+
 # 1. 
 # Plot AQI values for ozone by PM2.5, colored by site. 
-# Add a line of best fit for the linear regression of these variables.
+OZvPM <- 
+  ggplot(EPAair, aes(x = PM2.5, y = Ozone, color = Site.Name)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(OZvPM)
 
+# Add a line of best fit for the linear regression of these variables.
   
 ```
 
@@ -170,10 +195,12 @@ PeterPaul.nutrient.summaries <- PeterPaul.nutrients.gathered %>%
   summarise(sd = sd(concentration), 
             mean = mean(concentration))
 
+#If you want it to group by multiple different factors they have ot be in thhe same grouby fundtion. Otherwise the second groupby will overwrite the first. 
+
 Nutrientplot <- 
   ggplot(PeterPaul.nutrients.gathered) +
-  geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill?
-           position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here?
+  geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill? Bars have a border and a fill. The color will define the border. 
+           position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here? Bar charts require a stat. We are telling it to take the mean. 
 print(Nutrientplot)
 
 Nutrientplot2 <- 
@@ -182,6 +209,7 @@ Nutrientplot2 <-
   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), # how do we specify error bars?
                  position = "dodge")
 print(Nutrientplot2)
+#pulling from definition we already have in our summary file -- it doesn't automatically know to compute the mean. 
 
 # Are there more effective ways to produce summary stats for categories?
 
@@ -205,7 +233,7 @@ Nutrientplot5 <-
 print(Nutrientplot5)
 
 # Frequency polygons
-# Using a tidy dataset
+# Using a tidy dataset # one layer for each nutrient so will draw five separate lines. Have to specify the colors otherwise it will plot them all in blakc. 
 Nutrientplot6 <-
   ggplot(PeterPaul.chem.nutrients) +
   geom_freqpoly(aes(x = tn_ug), color = "black") +
@@ -215,7 +243,7 @@ Nutrientplot6 <-
   geom_freqpoly(aes(x = po4), color = "blue") 
 print(Nutrientplot6)
 
-# Using a gathered dataset
+# Using a gathered dataset #This has less code becasue the gathered dataset is skinny
 Nutrientplot7 <-   
   ggplot(PeterPaul.nutrients.gathered) +
   geom_freqpoly(aes(x = concentration, color = nutrient))
@@ -224,7 +252,26 @@ print(Nutrientplot7)
 # Exercise: Plot distributions of AQI values for EPAair
 
 # 1. 
-# Create a bar chart plus standard deviation error bars for PM2.5, divided by year. 
+# Create a bar chart plus standard deviation error bars for PM2.5, divided by year. Class errors are common.
+
+EPAairSummary <- 
+EPAair %>%
+  group_by(Site.Name, year) %>%
+  summarise(sd = (sd)PM2.5, na.rm = TRUE)),
+mean(PM2.5, na.rm = TRUE)
+            
+#(mean = mean(!is.na(PM2.5))
+            #sd = sd(!is.na(PM2.5)))
+
+BarPlot <- 
+  ggplot(EPAair) +
+  geom_bar(aes(x = Site.Name, y = PM2.5, fill = as.factor(nutrient)), 
+           position = "dodge", stat = "summary", fun.y = "mean") +
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), 
+                 position = "dodge")
+  
+print(BarPlot)
+
 # Create separate bars for each site. 
 
 # 2. 

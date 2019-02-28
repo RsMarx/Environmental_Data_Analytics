@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Rebecca Marx"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -34,15 +34,57 @@ The completed exercise is due on Tuesday, 19 February, 2019 before class begins.
 
 ```{r}
 #1
+setwd("C:/Users/rsmar/OneDrive/Documents/Spring 2019/RFolder/Environmental_Data_Analytics")
+#install.packages("gridExtra")
+library(RColorBrewer)
+library(viridis)
+library(colormap)
+library(gridExtra)
+library(tidyverse)
+
+#Load data
+
+PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+
+PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+
+EPAecotox <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+
+USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+class(USGS.flow.data)
 
 #2
+
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y")
+
+USGS.flow.data$datetime <- format(USGS.flow.data$datetime,"%y%m%d")
+
+create.early.dates <- (function(d) { 
+  paste0(ifelse(d > 181231,"19","20"),d)
+  })
+
+USGS.flow.data$datetime  <- create.early.dates(USGS.flow.data$datetime)
+
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d" )
+
+class(USGS.flow.data$datetime)
+
+PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
+
+PeterPaul.nutrients.gathered$sampledate <- as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
+
+
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
 
 ```{r}
 #3
-
+RMtheme <- theme_bw(base_size = 11) +
+  theme(plot.title = element_text(size = 15, color = "black", hjust = .5),
+    axis.text = element_text(color = "black"),
+    legend.position = "bottom", legend.text = element_text(size = 11), legend.title = element_text(size = 11))
+  
 ```
 
 ## Create graphs
@@ -54,6 +96,21 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 
 ```{r}
 #4
+legend_title_4 <- "Lake Name"
+
+Q4graph <- ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = po4, color = lakename)) +
+  geom_point() +
+  ggtitle("Phosphorus & Phosphate in Paul Lake and Peter Lake") +
+  ylab(expression("Total Phosphate (mg/L)")) +
+  scale_y_continuous(limits = c(0,50)) +
+  xlab(expression("Total Phosphorus (mg/L")) +
+  scale_x_continuous(breaks=seq(0, 150, by=10)) +
+  scale_color_manual(legend_title_4,values = c("deepskyblue4", "aquamarine3")) +
+  geom_smooth(method = lm, color = "black") +
+  RMtheme
+print(Q4graph)
+
+#  
 
 ```
 
@@ -63,6 +120,30 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 ```{r}
 #5
 
+Peter.nutrients.gathered <- filter(PeterPaul.nutrients.gathered, lakename == "Peter Lake")
+
+class(Peter.nutrients.gathered$sampledate)
+
+Peter.nutrients.gathered$sampledate <- as.Date(Peter.nutrients.gathered$sampledate, format = "%Y-%m-%d")
+
+class(Peter.nutrients.gathered$sampledate)
+
+legend_title_5 <- "Depth of Nutrients"
+
+Q5_graph <- 
+  ggplot(Peter.nutrients.gathered) +
+  geom_point(aes(x=sampledate, y = concentration, color = depth)) +
+  facet_grid(~ nutrient) +
+  scale_color_viridis(legend_title_5, option = "viridis", direction = -1) +
+  ggtitle("Nutrients in Peter Lake") +
+  ylab(expression("Nutrient Concentrations (mg/L)")) +
+  xlab(expression("Date")) +
+  scale_x_date(limits = as.Date(c("1992-01-01", "2015-12-31")),
+  date_breaks = "48 months", date_labels = "%b %y") +
+  RMtheme +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1)) 
+print(Q5_graph)
+
 ```
 
 
@@ -70,16 +151,61 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 
 ```{r}
 #6
+#rename columns
+colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime", "discharge.max", "discharge.max.approval", "discharge.min", "discharge.min.approval", "discharge.mean", "discharge.mean.approval", "gage.height.max", "gage.height.max.approval", "gage.height.min", "gage.height.min.approval", "gage.height.mean", "gage.height.mean.approval")
+
+Q6_graph.line <- 
+  ggplot(USGS.flow.data, aes(x=datetime, y = discharge.max)) +
+  geom_line(color = "deepskyblue4") +
+  ggtitle("Max Discharge at USGS Sites") +
+  ylab(expression("Discharge (cfs)")) +
+  xlab(expression("Date")) +
+  scale_x_date(limits = as.Date(c("1928-01-01", "2018-12-09")),
+  date_breaks = "5 years", date_labels = "%Y") +
+  RMtheme +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1)) 
+print(Q6_graph.line)
+
+Q6_graph.smooth <- 
+ ggplot(USGS.flow.data, aes(x=datetime, y = discharge.max)) +
+  geom_smooth(color = "seagreen") +
+  ggtitle("Max Discharge at USGS Sites") +
+  ylab(expression("Discharge (cfs)")) +
+  scale_y_continuous(breaks=seq(0, 200, by=20)) +
+  xlab(expression("Date")) +
+  scale_x_date(limits = as.Date(c("1928-01-01", "2018-12-09")),
+  date_breaks = "5 years", date_labels = "%Y") +
+  RMtheme +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1)) 
+print(Q6_graph.smooth)
+
+Q6_graph_combined <- grid.arrange(Q6_graph.line, Q6_graph.smooth)
+print(Q6_graph_combined)
+  
+
 
 ```
 Question: How do these two types of lines affect your interpretation of the data?
 
-> Answer:
+> Answer: The smooth chart is much easier to look at and determine the distribution of data given that it is less cluttered and includes the gray area indicating the standard deviation. In addition, geom_line displays a much larger range of discharge becuase it connects all of the outliers, whereas smooth averages the disharges. Smooth also interpolates what the dishcharge might be in the years where the value is "NA" (~1973 - 1985) whereas the line graph shows no values. If I did not know these were NAs, I might think discharge was quite low during that set of years by looking at the smooth graph rather than appreciating that there simply was no data for those years. 
 
 7. [ECOTOX Neonicotinoids] Plot the concentration, divided by chemical name. Choose a geom that accurately portrays the distribution of data points.
 
 ```{r}
 #7 
+
+legend_title_7 <- "Chemical Name"
+Q7_graph <- 
+  ggplot(EPAecotox, aes(x = Chemical.Name, y = Conc..Mean..Std., color = Chemical.Name)) +
+  geom_boxplot() +
+  scale_color_manual(values = c("steelblue4", "firebrick3", "slateblue3", "tan2", "seagreen4", "plum4", "lightskyblue4", "deeppink3", "goldenrod3")) +
+  scale_y_continuous(limits = c(0,2000)) +
+  ggtitle("Chemical Concentrations") +
+  ylab(expression("Concentrations (mg/L)")) +
+  xlab(expression("Chemical")) +
+  RMtheme +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1), legend.text = element_text(size = 8), legend.title = element_text(size = 9))
+print(Q7_graph)
 
 ```
 

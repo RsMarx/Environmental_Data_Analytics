@@ -38,6 +38,7 @@ getwd()
 
 #Load package
 library(tidyverse)
+library(lubridate)
 
 #Import data
 EPAair_O3_17 <- read.csv("./Data/Raw/EPAair_O3_NC2017_raw.csv")
@@ -138,7 +139,9 @@ EPAairBind <- rbind(EPAair_O3_17.select,EPAair_O3_18.select,EPAair_PM25_17.selec
 EPAairBind.Filter <- 
   EPAairBind %>% 
   filter(Site.Name == "Blackstone" | Site.Name ==  "Bryson City" | Site.Name == "Triple Oak") %>% 
-  separate(Date, c("Y", "m", "d"))
+  mutate(Year = year(Date)) %>% 
+  mutate(Month = month(Date)) %>% 
+  mutate(Day = day(Date))
   
 #9
 EPAair.B.F.Spread <- spread(EPAairBind.Filter, AQS_PARAMETER_DESC, DAILY_AQI_VALUE)
@@ -160,47 +163,31 @@ b. A summary table of the mean, minimum, and maximum AQI values of O3 and PM2.5 
 
 ```{r}
 #12a
-EPAair.SummaryA <- 
+ EPAair.SummaryA <- 
   EPAair.B.F.Spread %>% 
-  group_by(m) %>% 
-  filter(!is.na(Ozone) & !is.na(PM2.5)) %>% 
-  summarise(mean_Ozone = mean(Ozone), 
-            min_Ozone = min(Ozone), 
-            max_Ozone = max(Ozone),
-            mean_PM2.5 = mean(PM2.5),
-            min_PM2.5 = min(PM2.5),
-            max_PM2.5 = max(PM2.5))
+  group_by(Month) %>% 
+  summarise (mean_Ozone = mean(Ozone, na.rm=TRUE), 
+            min_Ozone = min(Ozone, na.rm=TRUE), 
+            max_Ozone = max(Ozone, na.rm=TRUE),
+            mean_PM2.5 = mean(PM2.5, na.rm=TRUE),
+            min_PM2.5 = min(PM2.5, na.rm=TRUE),
+            max_PM2.5 = max(PM2.5, na.rm=TRUE))
 
 #12b
 EPAair.SummaryB <- 
   EPAair.B.F.Spread %>% 
-  group_by(Site.Name) %>% 
-  filter(!is.na(Ozone) & !is.na(PM2.5)) %>% 
-  summarise (mean_Ozone = mean(Ozone), 
-            min_Ozone = min(Ozone), 
-            max_Ozone = max(Ozone),
-            mean_PM2.5 = mean(PM2.5),
-            min_PM2.5 = min(PM2.5),
-            max_PM2.5 = max(PM2.5))
-
-#Extra summary to see Triple Oak PM2.5 values
-EPAair.SummaryB_wNAs <- 
-EPAair.B.F.Spread %>% 
-  group_by(Site.Name) %>% 
-  summarise (mean_Ozone = mean(Ozone), 
-            min_Ozone = min(Ozone), 
-            max_Ozone = max(Ozone),
-            mean_PM2.5 = mean(PM2.5),
-            min_PM2.5 = min(PM2.5),
-            max_PM2.5 = max(PM2.5))
+  group_by(Site.Name) %>%
+  summarise (mean_Ozone = mean(Ozone, na.rm=TRUE), 
+            min_Ozone = min(Ozone, na.rm=TRUE), 
+            max_Ozone = max(Ozone, na.rm=TRUE),
+            mean_PM2.5 = mean(PM2.5, na.rm=TRUE),
+            min_PM2.5 = min(PM2.5, na.rm=TRUE),
+            max_PM2.5 = max(PM2.5, na.rm=TRUE))
 
 #13
 print(EPAair.SummaryA)
 print(EPAair.SummaryB)
 
-#See SummaryB above. 
-#Added second summary to see PM Triple Oak PM values that were filtered out w/ NA filter. 
-print(EPAair.SummaryB_wNAs)
 
 ```
 
